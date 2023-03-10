@@ -188,7 +188,7 @@ public class Robot extends TimedRobot {
     {
       mElevatorPIDController.setReference(50, CANSparkMax.ControlType.kPosition);
     }
-    if(m_stickArm.getXButtonPressed())
+    else if(m_stickArm.getXButtonPressed())
     {
       mElevatorPIDController.setReference(0, CANSparkMax.ControlType.kPosition);
     }
