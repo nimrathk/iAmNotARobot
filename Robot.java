@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import com.revrobotics.CANSparkMax;
@@ -15,6 +16,11 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
+
+// import edu.wpi.first.wpilibj.Compressor;
+// import edu.wpi.first.wpilibj.PneumaticsModuleType;
+// import com.revrobotics.RelativeEncoder;
+// import com.revrobotics.SparkMaxRelativeEncoder;
 
 public class Robot extends TimedRobot {
   private final WPI_VictorSPX m_leftFrontMotor = new WPI_VictorSPX(6);
@@ -35,6 +41,9 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private final Timer m_timer = new Timer();
 
+  // private final Compressor theCompressor = new Compressor(PneumaticsModuleType.CTREPCM);
+  // Compressor compressor;
+
   private CANSparkMax mPivotMotor;
   private CANSparkMax mElevatorMotor;
   private CANSparkMax mGripperMotor;
@@ -50,7 +59,12 @@ public class Robot extends TimedRobot {
   private static final double kElevatorPowerIn = -0.7;
 
   private static final double kGripperPowerOut = 1.0;
-  private static final double kGripperPowerIn = -0.7;
+  private static final double kGripperPowerIn = -1.0;
+
+  // private static final double kExtensionPowerOut = 0.6;
+  // private static final double kExtensionPowerIn = -0.6;
+  // private static final double kPivotBoostAmount = -3;
+  // private static final double kPivotBoost2Amount = -15;
 
   private static final double kPivotCLRampRate = 0.5;
   private static final double kElevatorCLRampRate = 0.5;
@@ -103,17 +117,17 @@ public class Robot extends TimedRobot {
     mGripperMotor.restoreFactoryDefaults();
     mGripperPIDController = mGripperMotor.getPIDController();
 
-    mGripperPIDController.setP(0.1);
-    mGripperPIDController.setI(1e-8);
-    mGripperPIDController.setD(1);
+    mGripperPIDController.setP(6e-5);
+    mGripperPIDController.setI(0);
+    mGripperPIDController.setD(0);
     mGripperPIDController.setIZone(0);
-    mGripperPIDController.setFF(0);
+    mGripperPIDController.setFF(0.00015);
     mGripperPIDController.setOutputRange(kGripperPowerIn, kGripperPowerOut);
     mGripperMotor.setClosedLoopRampRate(kGripperCLRampRate);
 
     mGripperPIDController.setReference(0, CANSparkMax.ControlType.kPosition);
   }
-  
+  //matthewgpage@gmail.com
   @Override
   public void autonomousInit() {
     m_timer.reset();
@@ -163,28 +177,33 @@ public class Robot extends TimedRobot {
 
     if(m_stickArm.getBButtonPressed())
     {
-      mPivotPIDController.setReference(200, CANSparkMax.ControlType.kPosition);
-      if(m_stickArm.getYButtonPressed())
-      {
-        mElevatorPIDController.setReference(50, CANSparkMax.ControlType.kPosition);
-      }
+      mPivotPIDController.setReference(30, CANSparkMax.ControlType.kPosition);
     }
-    if(m_stickArm.getAButtonPressed())
+    else if(m_stickArm.getAButtonPressed())
     {
       mPivotPIDController.setReference(0, CANSparkMax.ControlType.kPosition);
+    }
+
+    if(m_stickArm.getYButtonPressed())
+    {
+      mElevatorPIDController.setReference(50, CANSparkMax.ControlType.kPosition);
     }
     if(m_stickArm.getXButtonPressed())
     {
       mElevatorPIDController.setReference(0, CANSparkMax.ControlType.kPosition);
     }
 
-    while(m_stickArm.getLeftTriggerAxis() > 0)
+    if(m_stickArm.getLeftTriggerAxis() > 0)
     {
-      mGripperPIDController.setReference(2, CANSparkMax.ControlType.kPosition);
+      mGripperPIDController.setReference(3000, CANSparkMax.ControlType.kVelocity);
     }
-    while(m_stickArm.getRightTriggerAxis() > 0)
+    else if(m_stickArm.getRightTriggerAxis() > 0)
     {
-      mGripperPIDController.setReference(-2, CANSparkMax.ControlType.kPosition);
+      mGripperPIDController.setReference(-3000, CANSparkMax.ControlType.kVelocity);
+    }
+    else 
+    {
+      mGripperPIDController.setReference(0, CANSparkMax.ControlType.kVelocity);
     }
   }
 }
